@@ -1,0 +1,35 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+group = 'ua.pp.msk.gradle'
+version = '0.1'
+
+
+repositories {
+    mavenCentral()
+}
+
+task sourcesJar(type: Jar, dependsOn: classes, description: 'Creates a jar from the source files.') {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives jar
+    archives sourcesJar
+}
+
+dependencies {
+    compile gradleApi()
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.10'
+    testCompile 'junit:junit:4.11'
+}
+
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: uri('/tmp/lmr'))
+        }
+    }
+}
