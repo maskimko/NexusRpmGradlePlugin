@@ -13,24 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ua.pp.msk.gradle;
 
-import org.gradle.api.Plugin;
-import org.gradle.api.Project;
-import ua.pp.msk.gradle.ext.NexusConf;
-import ua.pp.msk.gradle.rpm.RpmUpload;
-
+package ua.pp.msk.gradle.exceptions;
 
 /**
  *
  * @author Maksym Shkolnyi aka Maksym Shkolnyi <mshkolnyi@ukr.net> aka maskimko
  */
-public class NexusRpmJavaPlugin implements Plugin<Project> {
+public class ClientSslException  extends Exception {
 
-    @Override
-    public void apply(Project target) {
-        target.getTasks().create("uploadRpm", RpmUpload.class);
-        target.getExtensions().create("nexusConf", NexusConf.class);
+    public ClientSslException(String message) {
+        super(message);
+    }
+
+    public ClientSslException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public ClientSslException(Throwable cause) {
+        super(cause);
     }
 
 }

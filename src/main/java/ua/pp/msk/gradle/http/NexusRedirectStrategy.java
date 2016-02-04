@@ -13,24 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ua.pp.msk.gradle;
 
-import org.gradle.api.Plugin;
-import org.gradle.api.Project;
-import ua.pp.msk.gradle.ext.NexusConf;
-import ua.pp.msk.gradle.rpm.RpmUpload;
+package ua.pp.msk.gradle.http;
 
+import org.apache.http.impl.client.DefaultRedirectStrategy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Maksym Shkolnyi aka Maksym Shkolnyi <mshkolnyi@ukr.net> aka maskimko
  */
-public class NexusRpmJavaPlugin implements Plugin<Project> {
-
+public class NexusRedirectStrategy extends DefaultRedirectStrategy {
+ private Logger logger = LoggerFactory.getLogger(NexusRedirectStrategy.class);
+            
+    
     @Override
-    public void apply(Project target) {
-        target.getTasks().create("uploadRpm", RpmUpload.class);
-        target.getExtensions().create("nexusConf", NexusConf.class);
+    protected boolean isRedirectable(String method) {
+        boolean redirectable = super.isRedirectable(method); //To change body of generated methods, choose Tools | Templates.
+        logger.debug("Method " + method + " is redirectable " + redirectable);
+        logger.debug("Ignoring and returning true");
+        return true;
     }
-
 }
