@@ -22,6 +22,7 @@ artifacts {
 dependencies {
     compile gradleApi()
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.10'
+    compile group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.2.2'
     testCompile 'junit:junit:4.11'
 }
 

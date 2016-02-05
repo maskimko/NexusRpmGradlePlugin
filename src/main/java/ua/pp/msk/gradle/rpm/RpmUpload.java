@@ -15,9 +15,12 @@
  */
 package ua.pp.msk.gradle.rpm;
 
+import java.net.MalformedURLException;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.tasks.TaskAction;
+import ua.pp.msk.gradle.exceptions.ClientSslException;
 import ua.pp.msk.gradle.ext.NexusConf;
+import ua.pp.msk.gradle.http.Client;
 
 
 /**
@@ -31,7 +34,7 @@ public class RpmUpload extends DefaultTask {
         getLogger()
                 .info("Starting app info task");
 
-        //  try {
+         try {
         NexusConf nc = getProject().getExtensions().findByType(NexusConf.class);
         if (nc == null) {
             nc = new NexusConf();
@@ -46,43 +49,18 @@ public class RpmUpload extends DefaultTask {
         getLogger().debug("Extension " + nc.getExtension());
         getLogger().debug("Packaging " + nc.getPackaging());
         getLogger().debug("Has POM " + nc.isHasPom());
-//        if (aix.getOutput() == null || aix.getOutput().length() == 0) {
-//            output = System.out;
-//            getLogger().debug("CliQr Info output to stdout");
-//        } else {
-//            File of = new File(aix.getOutput());
-//            of.getParentFile().mkdirs();
-//            output = new PrintStream(new FileOutputStream(of));
-//            getLogger().debug("CliQr Info output to file " + aix.getOutput());
-//        }
-//
-//        String response = null;
-//        AppInfo ai = new AppInfoImpl(cx.getHost(), cx.getUser(), cx.getApiKey());
-//        if (aix.getAppId() >= 0) {
-//            response = ai.getAppInfo(aix.getAppId());
-//        } else {
-//            response = ai.getAppInfo();
-//        }
-//        output.print(response);
-//    }
-//    catch (FileNotFoundException ex
-//
-//    
-//        ) {
-//           getLogger().error("Cannot find file", ex);
-//    }
-//    catch (MalformedURLException | ClientSslException | ResponseException ex
-//
-//    
-//        ) {
-//            getLogger().error("Cannot get response", ex);
-//    }
-//
-//    
-//        finally {
-//            if (output != null) {
-//            output.close();
-//        }
-//    }
+        
+        Client c = new Client(nc.getUrl(), nc.getUser(), nc.getPassword());
+            boolean isUploaded = c.upload(nc);
+            if (isUploaded) {
+                System.out.println("Artifact has been successfully uploaded");
+            } else {
+                 System.err.println("Artifact has been not uploaded due to errors");
+            }
+         } catch (ClientSslException ex) {
+             getLogger().error("SSL Error", ex);
+         } catch (MalformedURLException  ex) {
+             getLogger().error("Bad URL", ex);
+         }
     }
 }

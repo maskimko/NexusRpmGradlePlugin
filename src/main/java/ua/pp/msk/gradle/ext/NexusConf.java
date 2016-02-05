@@ -36,9 +36,9 @@ public class NexusConf {
     private String artifact;
     private String version;
     private String group;
-    private String user = null;
-    private String password = null;
-    private String url;
+    private String user = "da09758";
+    private String password = "Yjdsqgfhjkm,bfc11";
+    private String url = "http://repomgtlsmsdc01.ds.dtveng.net:8081/nexus/service/local/artifact/maven/content";
 
     public String getRepository() {
         return repository;
