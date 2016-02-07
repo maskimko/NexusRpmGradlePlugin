@@ -18,12 +18,10 @@ package ua.pp.msk.gradle.http;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -41,8 +39,6 @@ import org.apache.http.client.protocol.ClientContextConfigurer;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.FormBodyPart;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ContentBody;
@@ -58,6 +54,7 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ua.pp.msk.gradle.exceptions.ArtifactPromotionException;
 import ua.pp.msk.gradle.exceptions.BadCredentialsException;
 import ua.pp.msk.gradle.exceptions.ClientSslException;
 import ua.pp.msk.gradle.exceptions.ResponseException;
@@ -65,7 +62,7 @@ import ua.pp.msk.gradle.ext.NexusConf;
 
 /**
  *
- * @author Maksym Shkolnyi aka Maksym Shkolnyi <mshkolnyi@ukr.net> aka maskimko
+ * @author Maksym Shkolnyi 
  */
 public class Client {
 
@@ -73,7 +70,7 @@ public class Client {
     private final Logger logger = LoggerFactory.getLogger(Client.class);
     private HttpContext context;
     private HttpClient client;
-    private String userAgent = "Maven Dependency pushing plugin";
+    private final String userAgent = "Maven Dependency pushing plugin";
 
     public Client(String url, String user, String password) throws ClientSslException, MalformedURLException {
         if (!url.contains("/nexus/service/local/artifact/maven/content")) {
@@ -127,8 +124,9 @@ public class Client {
         client = defClient;
     }
 
-    public boolean upload(NexusConf nc) {
+    public boolean upload(NexusConf nc) throws ArtifactPromotionException{
         boolean result = false;
+        String possibleFailReason = "Unknown";
         try {
             HttpPost httpPost = new HttpPost(targetUrl.toString());
             //httpPost.setHeader("Content-Type", "multipart/form-data");
@@ -164,10 +162,12 @@ public class Client {
             HttpEntity entity = postResponse.getEntity();
 
             try (BufferedReader bufReader = new BufferedReader(new InputStreamReader(entity.getContent()))) {
-                bufReader.lines().forEach(e -> logger.debug(e));
+              StringBuilder fsb = new StringBuilder();
+                bufReader.lines().forEach(e -> {logger.debug(e);
+                fsb.append(e); fsb.append("\n");});
+                possibleFailReason = fsb.toString();
             } catch (IOException ex) {
-                logger.warn("Cannot get entity response");
-
+                logger.warn("Cannot get entity response", ex);
             }
 
             switch (statusCode) {
@@ -182,17 +182,20 @@ public class Client {
                 case 401:
                     throw new BadCredentialsException("Bad credentials. Response status: " + postResponse.getStatusLine());
                 default:
-                    throw new ResponseException("Response is not OK. Response status: " + postResponse.getStatusLine());
+                    throw new ResponseException(String.format("Response is not OK. Response status: %s\n\tPossible reason: %s" , postResponse.getStatusLine(), possibleFailReason));
             }
 
             EntityUtils.consume(entity);
 
         } catch (UnsupportedEncodingException ex) {
             logger.error("Encoding is unsuported ", ex);
+            throw new ArtifactPromotionException("Encoding is unsuported " + ex.getMessage());
         } catch (IOException ex) {
             logger.error("Got IO excepption ", ex);
+            throw new ArtifactPromotionException("Input/Output error " + ex.getMessage());
         } catch (ResponseException | BadCredentialsException ex) {
             logger.error("Cannot upload artifact", ex);
+            throw new ArtifactPromotionException("Cannot upload artifact " + ex.getMessage());
         }
         return result;
     }

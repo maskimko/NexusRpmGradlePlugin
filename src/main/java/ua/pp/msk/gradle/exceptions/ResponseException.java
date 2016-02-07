@@ -18,9 +18,9 @@ package ua.pp.msk.gradle.exceptions;
 
 /**
  *
- * @author Maksym Shkolnyi aka Maksym Shkolnyi <mshkolnyi@ukr.net> aka maskimko
+ * @author Maksym Shkolnyi 
  */
-public class ResponseException extends Exception{
+public class ResponseException extends ArtifactPromotionException{
 
     public ResponseException(String message) {
         super(message);

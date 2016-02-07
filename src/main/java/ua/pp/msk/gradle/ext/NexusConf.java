@@ -18,7 +18,7 @@ package ua.pp.msk.gradle.ext;
 
 /**
  *
- * @author Maksym Shkolnyi aka Maksym Shkolnyi <mshkolnyi@ukr.net> aka maskimko
+ * @author Maksym Shkolnyi 
  */
 public class NexusConf {
 

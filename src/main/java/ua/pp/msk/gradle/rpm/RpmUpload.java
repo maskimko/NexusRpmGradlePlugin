@@ -19,18 +19,19 @@ import java.io.Console;
 import java.net.MalformedURLException;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.tasks.TaskAction;
-import ua.pp.msk.gradle.exceptions.ClientSslException;
+import org.gradle.api.tasks.TaskExecutionException;
+import ua.pp.msk.gradle.exceptions.ArtifactPromotionException;
 import ua.pp.msk.gradle.ext.NexusConf;
 import ua.pp.msk.gradle.http.Client;
 
 /**
  *
- * @author Maksym Shkolnyi aka Maksym Shkolnyi <mshkolnyi@ukr.net> aka maskimko
+ * @author Maksym Shkolnyi 
  */
 public class RpmUpload extends DefaultTask {
 
     @TaskAction
-    public void uploadArtifact() {
+    public void uploadArtifact() throws TaskExecutionException{
         getLogger()
                 .info("Starting app info task");
 
@@ -70,10 +71,11 @@ public class RpmUpload extends DefaultTask {
             } else {
                 System.err.println("Artifact has been not uploaded due to errors");
             }
-        } catch (ClientSslException ex) {
-            getLogger().error("SSL Error", ex);
+        } catch (ArtifactPromotionException ex) {
+            getLogger().error("Cannot promote artifact", ex);
+            throw new TaskExecutionException(this, ex);
         } catch (MalformedURLException ex) {
-            getLogger().error("Bad URL", ex);
+             throw new TaskExecutionException(this, ex);
         }
     }
 }

@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Maksym Shkolnyi aka Maksym Shkolnyi <mshkolnyi@ukr.net> aka maskimko
+ * @author Maksym Shkolnyi 
  */
 public class NexusHostnameVerifier implements X509HostnameVerifier, HostnameVerifier{
  private final Logger logger = LoggerFactory.getLogger(NexusHostnameVerifier.class); 

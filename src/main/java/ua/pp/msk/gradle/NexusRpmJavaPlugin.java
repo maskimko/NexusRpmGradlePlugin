@@ -23,7 +23,7 @@ import ua.pp.msk.gradle.rpm.RpmUpload;
 
 /**
  *
- * @author Maksym Shkolnyi aka Maksym Shkolnyi <mshkolnyi@ukr.net> aka maskimko
+ * @author Maksym Shkolnyi aka Maksym Shkolnyi  aka maskimko
  */
 public class NexusRpmJavaPlugin implements Plugin<Project> {
 

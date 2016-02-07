@@ -2,7 +2,7 @@ apply plugin: 'java'
 apply plugin: 'maven'
 
 group = 'ua.pp.msk.gradle'
-version = '0.1'
+version = '0.2'
 
 
 repositories {
@@ -13,10 +13,14 @@ task sourcesJar(type: Jar, dependsOn: classes, description: 'Creates a jar from 
     classifier = 'sources'
     from sourceSets.main.allSource
 }
-
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
 artifacts {
     archives jar
     archives sourcesJar
+    archives javadocJar
 }
 
 dependencies {

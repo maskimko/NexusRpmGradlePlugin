@@ -22,10 +22,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Maksym Shkolnyi aka Maksym Shkolnyi <mshkolnyi@ukr.net> aka maskimko
+ * @author Maksym Shkolnyi 
  */
 public class NexusRedirectStrategy extends DefaultRedirectStrategy {
- private Logger logger = LoggerFactory.getLogger(NexusRedirectStrategy.class);
+ private final Logger logger = LoggerFactory.getLogger(NexusRedirectStrategy.class);
             
     
     @Override

@@ -18,9 +18,9 @@ package ua.pp.msk.gradle.exceptions;
 
 /**
  *
- * @author Maksym Shkolnyi aka Maksym Shkolnyi <mshkolnyi@ukr.net> aka maskimko
+ * @author Maksym Shkolnyi 
  */
-public class ClientSslException  extends Exception {
+public class ClientSslException  extends ArtifactPromotionException {
 
     public ClientSslException(String message) {
         super(message);

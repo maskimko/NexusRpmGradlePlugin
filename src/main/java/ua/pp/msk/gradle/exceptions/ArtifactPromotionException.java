@@ -20,18 +20,20 @@ package ua.pp.msk.gradle.exceptions;
  *
  * @author Maksym Shkolnyi 
  */
-public class BadCredentialsException extends ArtifactPromotionException{
+public class ArtifactPromotionException extends Exception{
 
-    public BadCredentialsException(String message) {
+    public ArtifactPromotionException(String message) {
         super(message);
     }
 
-    public BadCredentialsException(String message, Throwable cause) {
+    public ArtifactPromotionException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public BadCredentialsException(Throwable cause) {
+    public ArtifactPromotionException(Throwable cause) {
         super(cause);
     }
+
+    
 
 }
