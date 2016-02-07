@@ -1,7 +1,10 @@
-# NexusRpmGradlePlugin
+NexusRpmGradlePlugin
+====================
 Simple Gradle Plugin for uploading RPM Artifacts to Nexus 
 
-## Usage:
+Usage:
+------
+```
 ext {
    rpmRelease = '0'
    rpmArch = 'NOARCH'
@@ -34,3 +37,4 @@ nexusConf.hasPom false
 nexusConf.group "Maven group is required options by Nexus"
 nexusConf.url "http://<Nexus hostname>:<Nexus port 8081>/nexus/service/local/artifact/maven/content"
 }
+```
