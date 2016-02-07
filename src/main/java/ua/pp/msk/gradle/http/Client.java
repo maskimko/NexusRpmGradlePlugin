@@ -13,14 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package ua.pp.msk.gradle.http;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -38,11 +41,13 @@ import org.apache.http.client.protocol.ClientContextConfigurer;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
-import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.FormBodyPart;
+import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
@@ -68,14 +73,17 @@ public class Client {
     private final Logger logger = LoggerFactory.getLogger(Client.class);
     private HttpContext context;
     private HttpClient client;
-    
-    public Client(String url, String user, String password) throws ClientSslException, MalformedURLException{
-       
+    private String userAgent = "Maven Dependency pushing plugin";
+
+    public Client(String url, String user, String password) throws ClientSslException, MalformedURLException {
+        if (!url.contains("/nexus/service/local/artifact/maven/content")) {
+            url = url.concat("/nexus/service/local/artifact/maven/content");
+        }
         URL targetURL = new URL(url);
         init(targetURL, user, password);
     }
-    
-     private void init(URL targetURL, String user, String password) throws ClientSslException {
+
+    private void init(URL targetURL, String user, String password) throws ClientSslException {
         this.targetUrl = targetURL;
         logger.debug("Initializing " + this.getClass().getName() + " with target URL " + targetURL.toString());
         HttpHost htHost = new HttpHost(targetUrl.getHost(), targetUrl.getPort(), targetUrl.getProtocol());
@@ -118,57 +126,74 @@ public class Client {
         defClient.setTargetAuthenticationStrategy(new TargetAuthenticationStrategy());
         client = defClient;
     }
-     
-     public boolean upload(NexusConf nc){
-          boolean result = false;
+
+    public boolean upload(NexusConf nc) {
+        boolean result = false;
         try {
             HttpPost httpPost = new HttpPost(targetUrl.toString());
-            httpPost.setHeader("Content-Type", "multipart/form-data");
-            
-            MultipartEntity me = new MultipartEntity();
-            
+            //httpPost.setHeader("Content-Type", "multipart/form-data");
+
+            MultipartEntity me = new MultipartEntity(HttpMultipartMode.STRICT);
+//            FormBodyPart fbp = new FormBodyPart("form", new StringBody("check it"));
+//            fbp.addField("r", nc.getRepository());
+//            fbp.addField("hasPom", "" + nc.isHasPom());
+//            fbp.addField("e", nc.getExtension());
+//            fbp.addField("g", nc.getGroup());
+//            fbp.addField("a", nc.getArtifact());
+//            fbp.addField("v", nc.getVersion());
+//            fbp.addField("p", nc.getPackaging());
+//            me.addPart(fbp);
             File rpmFile = new File(nc.getFile());
             ContentBody cb = new FileBody(rpmFile);
-            FormBodyPart fbp = new FormBodyPart("file", cb);
-            fbp.addField("r", nc.getRepository());
-            fbp.addField("hasPom", ""+nc.isHasPom());
-            fbp.addField("e", nc.getExtension());
-            fbp.addField("g", nc.getGroup());
-            fbp.addField("a", nc.getArtifact());
-            fbp.addField("v", nc.getVersion());
-            fbp.addField("p", nc.getPackaging());
-            
-            me.addPart(fbp);
+            me.addPart("p", new StringBody(nc.getPackaging()));
+            me.addPart("e", new StringBody(nc.getExtension()));
+            me.addPart("r", new StringBody(nc.getRepository()));
+            me.addPart("g", new StringBody(nc.getGroup()));
+            me.addPart("a", new StringBody(nc.getArtifact()));
+            me.addPart("v", new StringBody(nc.getVersion()));
+            me.addPart("file", cb);
+
+            httpPost.setHeader("User-Agent", userAgent);
             httpPost.setEntity(me);
-           
-            HttpResponse  postResponse = client.execute(httpPost, context);
-                logger.debug("Status line: " + postResponse.getStatusLine().toString());
-                int statusCode = postResponse.getStatusLine().getStatusCode();
-                switch (statusCode) {
-                    case 200:
-                        logger.debug("Got a successful http response " + postResponse.getStatusLine());
-                        result = true;
-                        break;
-                    case 201:
-                        logger.debug("Created! Got a successful http response " + postResponse.getStatusLine());
-                        result = true;
-                        break;
-                    case 401:
-                        throw new BadCredentialsException("Bad credentials. Response status: " + postResponse.getStatusLine());
-                    default:
-                        throw new ResponseException("Response is not OK. Response status: " + postResponse.getStatusLine());
-                }
-                HttpEntity entity = postResponse.getEntity();
-  
-                EntityUtils.consume(entity);
-         
+
+            logger.debug("Sending request");
+            HttpResponse postResponse = client.execute(httpPost, context);
+            logger.debug("Status line: " + postResponse.getStatusLine().toString());
+            int statusCode = postResponse.getStatusLine().getStatusCode();
+
+            HttpEntity entity = postResponse.getEntity();
+
+            try (BufferedReader bufReader = new BufferedReader(new InputStreamReader(entity.getContent()))) {
+                bufReader.lines().forEach(e -> logger.debug(e));
+            } catch (IOException ex) {
+                logger.warn("Cannot get entity response");
+
+            }
+
+            switch (statusCode) {
+                case 200:
+                    logger.debug("Got a successful http response " + postResponse.getStatusLine());
+                    result = true;
+                    break;
+                case 201:
+                    logger.debug("Created! Got a successful http response " + postResponse.getStatusLine());
+                    result = true;
+                    break;
+                case 401:
+                    throw new BadCredentialsException("Bad credentials. Response status: " + postResponse.getStatusLine());
+                default:
+                    throw new ResponseException("Response is not OK. Response status: " + postResponse.getStatusLine());
+            }
+
+            EntityUtils.consume(entity);
+
         } catch (UnsupportedEncodingException ex) {
             logger.error("Encoding is unsuported ", ex);
         } catch (IOException ex) {
             logger.error("Got IO excepption ", ex);
-        } catch (ResponseException | BadCredentialsException ex){
+        } catch (ResponseException | BadCredentialsException ex) {
             logger.error("Cannot upload artifact", ex);
         }
         return result;
-     }
+    }
 }
