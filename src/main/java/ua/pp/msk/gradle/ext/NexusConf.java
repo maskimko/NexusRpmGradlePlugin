@@ -39,7 +39,16 @@ public class NexusConf {
     private String user = null;
     private String password = null;
     private String url = "http://repomgtlsmsdc01.ds.dtveng.net:8081/nexus/service/local/artifact/maven/content";
+    private String classifier;
 
+    public String getClassifier() {
+        return classifier;
+    }
+
+    public void setClassifier(String classifier) {
+        this.classifier = classifier;
+    }
+    
     public String getRepository() {
         return repository;
     }

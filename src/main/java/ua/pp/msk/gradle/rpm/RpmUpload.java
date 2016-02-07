@@ -49,6 +49,7 @@ public class RpmUpload extends DefaultTask {
             getLogger().debug("Version " + nc.getVersion());
             getLogger().debug("Extension " + nc.getExtension());
             getLogger().debug("Packaging " + nc.getPackaging());
+            getLogger().debug("Classifier " + nc.getClassifier());
             getLogger().debug("File " + nc.getFile());
             getLogger().debug("Has POM " + nc.isHasPom());
             if (nc.getUser() == null) {

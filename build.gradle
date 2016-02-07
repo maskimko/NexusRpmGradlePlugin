@@ -23,6 +23,13 @@ artifacts {
     archives javadocJar
 }
 
+
+signing {
+    sign configurations.archives
+}
+
+task wrapper(type: Wrapper) { gradleVersion = '2.10' }
+
 dependencies {
     compile gradleApi()
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.10'
@@ -33,8 +40,50 @@ dependencies {
 
 uploadArchives {
     repositories {
+    
         mavenDeployer {
-            repository(url: uri('/tmp/lmr'))
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+           
+            snapshotRepository (url: "https://oss.sonatype.org/content/repositories/snapshots", id: "ossrh"){
+                authentication(userName: System.properties['ossrh_user'], password: System.properties['ossrh_password'])
+            }
+               
+            
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/", id: "ossrh") {
+                authentication(userName: System.properties['ossrh_user'], password: System.properties['ossrh_password'])
+            }
+            pom.project {
+                groupId "${project.group}"
+                artifactId "${project.name}"
+                version "${project.version}"
+
+                name "Cliqr Gradle Plugin"
+                description "Simple Gradle plugin for managing CliQr jobs"
+                url 'https://github.com/maskimko/CliQrGradlePlugin.git'
+
+                    
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        distribution 'repo'
+                    }
+                }
+                scm {
+                    url "https://github.com/maskimko/CliQrGradlePlugin.git";
+                    connection "https://github.com/maskimko/CliQrGradlePlugin.git";
+                    developerConnection "https://github.com/maskimko/CliQrGradlePlugin.git";
+                }
+                developers {
+                    developer {
+                        id "maskimko";
+                        name "Maksym Shkolnyi";
+                        email "maskimko@ukr.net";
+                    }
+                }
+                    
+            }
+          
         }
     }
 }

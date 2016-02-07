@@ -62,7 +62,7 @@ import ua.pp.msk.gradle.ext.NexusConf;
 
 /**
  *
- * @author Maksym Shkolnyi 
+ * @author Maksym Shkolnyi
  */
 public class Client {
 
@@ -124,12 +124,11 @@ public class Client {
         client = defClient;
     }
 
-    public boolean upload(NexusConf nc) throws ArtifactPromotionException{
+    public boolean upload(NexusConf nc) throws ArtifactPromotionException {
         boolean result = false;
         String possibleFailReason = "Unknown";
         try {
             HttpPost httpPost = new HttpPost(targetUrl.toString());
-            //httpPost.setHeader("Content-Type", "multipart/form-data");
 
             MultipartEntity me = new MultipartEntity(HttpMultipartMode.STRICT);
 //            FormBodyPart fbp = new FormBodyPart("form", new StringBody("check it"));
@@ -149,6 +148,7 @@ public class Client {
             me.addPart("g", new StringBody(nc.getGroup()));
             me.addPart("a", new StringBody(nc.getArtifact()));
             me.addPart("v", new StringBody(nc.getVersion()));
+            me.addPart("c", new StringBody(nc.getClassifier()));
             me.addPart("file", cb);
 
             httpPost.setHeader("User-Agent", userAgent);
@@ -162,9 +162,12 @@ public class Client {
             HttpEntity entity = postResponse.getEntity();
 
             try (BufferedReader bufReader = new BufferedReader(new InputStreamReader(entity.getContent()))) {
-              StringBuilder fsb = new StringBuilder();
-                bufReader.lines().forEach(e -> {logger.debug(e);
-                fsb.append(e); fsb.append("\n");});
+                StringBuilder fsb = new StringBuilder();
+                bufReader.lines().forEach(e -> {
+                    logger.debug(e);
+                    fsb.append(e);
+                    fsb.append("\n");
+                });
                 possibleFailReason = fsb.toString();
             } catch (IOException ex) {
                 logger.warn("Cannot get entity response", ex);
@@ -182,7 +185,7 @@ public class Client {
                 case 401:
                     throw new BadCredentialsException("Bad credentials. Response status: " + postResponse.getStatusLine());
                 default:
-                    throw new ResponseException(String.format("Response is not OK. Response status: %s\n\tPossible reason: %s" , postResponse.getStatusLine(), possibleFailReason));
+                    throw new ResponseException(String.format("Response is not OK. Response status: %s\n\tPossible reason: %s", postResponse.getStatusLine(), possibleFailReason));
             }
 
             EntityUtils.consume(entity);
