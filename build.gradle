@@ -59,7 +59,7 @@ uploadArchives {
 
                 name "Nexus Rpm Gradle Plugin"
                 description "Simple Gradle plugin for uploading RPM artifacts to Nexus"
-                url 'https://github.com/maskimko/CliQrGradlePlugin.git'
+                url 'https://github.com/maskimko/NexusRpmGradlePlugin.git'
 
                     
                 licenses {
@@ -70,9 +70,9 @@ uploadArchives {
                     }
                 }
                 scm {
-                    url "https://github.com/maskimko/CliQrGradlePlugin.git";
-                    connection "https://github.com/maskimko/CliQrGradlePlugin.git";
-                    developerConnection "https://github.com/maskimko/CliQrGradlePlugin.git";
+                    url 'https://github.com/maskimko/NexusRpmGradlePlugin.git';
+                    connection 'https://github.com/maskimko/NexusRpmGradlePlugin.git';
+                    developerConnection 'https://github.com/maskimko/NexusRpmGradlePlugin.git';
                 }
                 developers {
                     developer {
