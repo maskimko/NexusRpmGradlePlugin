@@ -57,8 +57,8 @@ uploadArchives {
                 artifactId "${project.name}"
                 version "${project.version}"
 
-                name "Cliqr Gradle Plugin"
-                description "Simple Gradle plugin for managing CliQr jobs"
+                name "Nexus Rpm Gradle Plugin"
+                description "Simple Gradle plugin for uploading RPM artifacts to Nexus"
                 url 'https://github.com/maskimko/CliQrGradlePlugin.git'
 
                     
